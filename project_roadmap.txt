@@ -1,0 +1,264 @@
+📁 DESIGN PORTFOLIO WEBSITE — FULL ROADMAP
+==========================================
+
+🎯 GOAL
+Create a minimalistic portfolio website with:
+1. A front-end to display all designs in a responsive grid.
+2. An admin page to manage designs, update the CV, etc.
+3. A database storing images and their descriptions.
+
+Start 100% locally (SQLite + uploads folder), then migrate easily to Supabase for online hosting.
+
+
+───────────────────────────────
+PHASE 1 — PROJECT SETUP (LOCAL)
+───────────────────────────────
+
+📌 GOAL:
+Set up local environment and framework.
+
+🧩 REQUIREMENTS:
+- Node.js (v18+)
+- npm or yarn
+- Git
+
+💻 INSTALLS:
+```bash
+# Cursor prompt:
+npx create-next-app@latest design-portfolio
+cd design-portfolio
+npm install @prisma/client prisma next-auth bcrypt
+```
+
+🪄 INIT DATABASE (SQLite):
+```bash
+# Cursor prompt:
+npx prisma init --datasource-provider sqlite
+```
+
+Edit `.env`:
+```
+DATABASE_URL="file:./dev.db"
+```
+
+───────────────────────────────
+PHASE 2 — DATABASE & BACKEND
+───────────────────────────────
+
+📌 GOAL:
+Create a schema for designs and admin users.
+
+🧩 ACTIONS:
+- Define Prisma schema for:
+  - `Design` model: id, title, description, imagePath, createdAt
+  - `User` model: id, email, password
+
+💻 CREATE SCHEMA:
+```bash
+# Cursor prompt:
+code prisma/schema.prisma
+```
+
+Add inside:
+```prisma
+model Design {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  imagePath   String
+  createdAt   DateTime @default(now())
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+}
+```
+
+Then migrate:
+```bash
+# Cursor prompt:
+npx prisma migrate dev --name init
+```
+
+───────────────────────────────
+PHASE 3 — FILE UPLOAD SYSTEM
+───────────────────────────────
+
+📌 GOAL:
+Enable image upload and save image path in DB.
+
+🧩 ACTIONS:
+- Create `/public/uploads/` folder for images.
+- Create API route `/api/upload` that:
+  1. Accepts form-data (title, description, file)
+  2. Saves image in `/public/uploads/`
+  3. Creates entry in DB via Prisma
+
+💻 CREATE API FILE:
+```bash
+# Cursor prompt:
+code src/pages/api/upload.js
+```
+
+───────────────────────────────
+PHASE 4 — FRONT-END DESIGN GRID
+───────────────────────────────
+
+📌 GOAL:
+Display designs in a responsive grid.
+
+🧩 ACTIONS:
+- Create a `DesignGrid` component fetching designs from `/api/designs`
+- Grid = 3 columns desktop, 1 column mobile
+- Show title + description overlay
+
+💻 START FRONT:
+```bash
+# Cursor prompt:
+code src/pages/index.js
+```
+
+───────────────────────────────
+PHASE 5 — ADMIN DASHBOARD
+───────────────────────────────
+
+📌 GOAL:
+Create a simple admin page with:
+- Login system (NextAuth + credentials)
+- Form to add new designs
+- Form to update CV text
+
+💻 SETUP AUTH:
+```bash
+# Cursor prompt:
+code src/pages/api/auth/[...nextauth].js
+```
+
+💻 ADMIN PAGE:
+```bash
+# Cursor prompt:
+code src/pages/admin.js
+```
+
+───────────────────────────────
+PHASE 5.1 — ENHANCED ADMIN FEATURES
+───────────────────────────────
+
+📌 GOAL:
+Add advanced admin functionality:
+- Bulk upload multiple designs
+- Edit/update existing designs
+- Delete designs from portfolio
+- Complete CRUD operations
+
+🧩 ACTIONS:
+- Create bulk upload interface
+- Add design editing forms
+- Implement delete functionality
+- Add confirmation dialogs
+- Create design management dashboard
+
+💻 ENHANCED FEATURES:
+- Multi-file selection and upload
+- Design metadata editing (title, description, date)
+- Image replacement functionality
+- Batch operations for multiple designs
+- Advanced admin dashboard with design list
+
+───────────────────────────────
+PHASE 6 — TEST & VALIDATE LOCALLY
+───────────────────────────────
+
+📌 GOAL:
+Make sure the local site works perfectly.
+
+🧩 ACTIONS:
+1. Run local dev server:
+```bash
+# Cursor prompt:
+npm run dev
+```
+2. Go to http://localhost:3000
+   - Check design grid renders correctly.
+   - Add design via admin page.
+   - Check upload → file appears in `/public/uploads/`.
+   - Refresh → design appears in main grid.
+3. Validate:
+   - Database updated (`npx prisma studio`)
+   - Auth works (login/logout)
+   - CV text updates correctly.
+
+───────────────────────────────
+PHASE 7 — HOSTING PREPARATION
+───────────────────────────────
+
+📌 GOAL:
+Prepare codebase for online hosting.
+
+🧩 ACTIONS:
+1. Convert SQLite → Supabase (optional)
+   ```bash
+   # Cursor prompt:
+   npx prisma migrate reset
+   ```
+2. Create Supabase project.
+3. Update `.env`:
+   ```
+   DATABASE_URL="postgresql://...from-supabase..."
+   ```
+4. Deploy static assets (uploads) to Supabase Storage or a public CDN.
+
+───────────────────────────────
+PHASE 8 — DEPLOYMENT
+───────────────────────────────
+
+📌 GOAL:
+Go live with everything hosted.
+
+🧩 ACTIONS:
+1. Choose host:
+   - **Vercel** → best for Next.js
+   - **Supabase** → keeps DB and storage together
+2. Connect GitHub repo to Vercel.
+3. Deploy with:
+   ```bash
+   # Cursor prompt:
+   git init
+   git add .
+   git commit -m "Initial deployment"
+   git push origin main
+   ```
+4. Configure environment variables on Vercel dashboard (DATABASE_URL, NEXTAUTH_SECRET, etc.)
+
+───────────────────────────────
+PHASE 9 — MAINTENANCE & UPDATES
+───────────────────────────────
+
+📌 GOAL:
+Keep project maintainable and evolutive.
+
+🧩 ACTIONS:
+- Use `prisma studio` to view/edit local DB data.
+- Back up uploads and DB regularly.
+- Add search/filter features if needed.
+- Optionally, integrate a markdown CV or automatic CV upload.
+
+───────────────────────────────
+✅ SUCCESS CRITERIA
+───────────────────────────────
+
+- Local version fully functional:
+  - Add/edit designs
+  - Grid display responsive
+  - Authenticated admin
+  - Image uploads stored locally
+
+- Hosting version:
+  - Uses Supabase DB + storage
+  - Same functionality, online
+
+───────────────────────────────
+END OF FILE
+───────────────────────────────
