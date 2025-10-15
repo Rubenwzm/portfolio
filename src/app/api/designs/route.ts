@@ -11,10 +11,7 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json({
-      success: true,
-      designs,
-    })
+    return NextResponse.json(designs)
   } catch (error) {
     console.error('Error fetching designs:', error)
     return NextResponse.json(

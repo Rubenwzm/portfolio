@@ -32,14 +32,17 @@ export default function DesignManager({ onDesignUpdate }: DesignManagerProps) {
   const fetchDesigns = async () => {
     try {
       setIsLoading(true)
+      setError(null)
       const response = await fetch('/api/designs')
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       const data = await response.json()
-      setDesigns(data)
+      // Ensure data is always an array
+      setDesigns(Array.isArray(data) ? data : [])
     } catch (err) {
       setError('Failed to load designs.')
+      setDesigns([]) // Ensure designs is always an array
       console.error('Error fetching designs:', err)
     } finally {
       setIsLoading(false)
@@ -169,10 +172,11 @@ export default function DesignManager({ onDesignUpdate }: DesignManagerProps) {
   }
 
   const selectAll = () => {
-    if (selectedDesigns.size === designs.length) {
+    const designsLength = Array.isArray(designs) ? designs.length : 0
+    if (selectedDesigns.size === designsLength) {
       setSelectedDesigns(new Set())
     } else {
-      setSelectedDesigns(new Set(designs.map(d => d.id)))
+      setSelectedDesigns(new Set(Array.isArray(designs) ? designs.map(d => d.id) : []))
     }
   }
 
@@ -184,7 +188,7 @@ export default function DesignManager({ onDesignUpdate }: DesignManagerProps) {
     return <div className="text-center py-8 text-red-600">{error}</div>
   }
 
-  if (designs.length === 0) {
+  if (!Array.isArray(designs) || designs.length === 0) {
     return <div className="text-center py-8 text-gray-600">No designs uploaded yet.</div>
   }
 
@@ -205,7 +209,7 @@ export default function DesignManager({ onDesignUpdate }: DesignManagerProps) {
             onClick={selectAll}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            {selectedDesigns.size === designs.length ? 'Deselect All' : 'Select All'}
+            {selectedDesigns.size === (Array.isArray(designs) ? designs.length : 0) ? 'Deselect All' : 'Select All'}
           </button>
         </div>
       </div>
@@ -277,7 +281,7 @@ export default function DesignManager({ onDesignUpdate }: DesignManagerProps) {
 
       {/* Designs Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {designs.map((design) => (
+        {Array.isArray(designs) && designs.map((design) => (
           <div
             key={design.id}
             className={`relative border rounded-lg overflow-hidden bg-white ${

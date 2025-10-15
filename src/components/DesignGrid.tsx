@@ -19,15 +19,16 @@ export default function DesignGrid() {
   const fetchDesigns = async () => {
     try {
       const response = await fetch('/api/designs')
-      const result = await response.json()
-      
-      if (result.success) {
-        setDesigns(result.designs)
-      } else {
-        setError('Failed to load designs')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
+      const data = await response.json()
+      
+      // API now returns the array directly
+      setDesigns(Array.isArray(data) ? data : [])
     } catch (error) {
       setError('Failed to load designs')
+      setDesigns([])
       console.error('Error fetching designs:', error)
     } finally {
       setLoading(false)
